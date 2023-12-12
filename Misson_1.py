@@ -7,32 +7,35 @@ import pandas as pd
 from tkinter import scrolledtext
 import tkinter.filedialog as filedialog
 
+
 def init_data():
     tmp = []
     info = []
-    # file_name = "./data/project_data_카카오톡채널.txt"
     f = open("./data/project_data_카카오톡채널.txt", 'r')
     lines = f.read().splitlines()
     for line in lines:
         tmp.append(line)
     f.close()
 
+    start = False
     for index, value in enumerate(tmp):
-        if value.startswith("#"):
+        if value.startswith("#") and not start:
+            start = True
+            title = value
             text = ''
-            i = 1
-            while True:
-                # TODO : '#'전까지로 변경 필요
-                if tmp[index + i] == '':
-                    break
-                text = text + tmp[index + i]
-                i = i + 1
+        elif start:
+            text = text + value
 
-            info.append({
-                "title": value,
-                "content": text
-            })
-
+        if len(tmp) < index + 2:
+            break
+        else:
+            if tmp[index + 1].startswith('#') and start:
+                start = False
+                info.append({
+                    "title": title.replace(" ", ""),
+                    "content": text.replace(" ", "")
+                })
+    print(info)
     return json.dumps(info)
 
 
@@ -83,27 +86,28 @@ def send_gpt(message_log, functions, temperature=1.5, max_tokens=2048):
     return response.choices[0].message.content
 
 
-def main():
-    message_log = [
-        {
-            "role": "system",
-            "content": '''
-                너는 고객 상담사야. 아주 친절하게 대답을 해줘야해 
-             '''
-        }
-    ]
-    functions = [
-        {
-            "name": "get_chanel_info",
-            "description": "카카오톡 채널에 대한 정보를 json으로 전달해줍니다.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                },
+message_log = [
+    {
+        "role": "system",
+        "content": '''
+            너는 고객 상담사야. 아주 친절하게 대답을 해줘야해 
+         '''
+    }
+]
+functions = [
+    {
+        "name": "get_chanel_info",
+        "description": "카카오톡 채널에 대한 정보를 json으로 전달해줍니다.",
+        "parameters": {
+            "type": "object",
+            "properties": {
             },
-        }
-    ]
+        },
+    }
+]
 
+
+def main():
 
     def show_popup_message(window, message):
         popup = tk.Toplevel(window)
@@ -186,10 +190,11 @@ def main():
     window.bind('<Return>', lambda event: on_send())
     window.mainloop()
 
-    ###
-    # completion = send_gpt(messages)
-    # response_message = completion["choices"][0]["message"]
-    #
+
+def test_unit(messages):
+    response_message = send_gpt(messages, functions)
+    print(response_message)
+
     # # print(response_message)
     #
     # if response_message.get("function_call"):
@@ -210,8 +215,8 @@ def main():
     #         }
     #     )
     #
-    #     r2 = send_gpt(messages)
-    #     f_response = r2["choices"][0]["message"]
+    #     r2 = send_gpt(messages, functions)
+    #     f_response = r2
     # else:
     #     f_response = response_message
     #
@@ -220,4 +225,11 @@ def main():
 
 
 if __name__ == '__main__':
+    # Main
     main()
+
+    # Test
+    # test_unit([
+    #     {"role": "user", "content": "채널에 대해 설명해줘"}
+    # ])
+    # init_data()

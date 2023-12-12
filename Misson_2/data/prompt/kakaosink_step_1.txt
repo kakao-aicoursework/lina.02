@@ -1,0 +1,9 @@
+<{title_1}>
+{content_1}
+</{title_1}>
+
+<{title_2}>
+{content_2}
+</{title_2}>
+
+내용을 설명할 수 있게 요약해줘

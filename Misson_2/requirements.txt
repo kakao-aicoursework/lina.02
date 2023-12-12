@@ -1,0 +1,8 @@
+fastapi==0.100.0
+uvicorn==0.22.0
+gunicorn==20.1.0
+aiohttp==3.8.5
+openai==0.28
+langchain~=0.0.349
+pydantic~=2.5.2
+requests~=2.31.0
