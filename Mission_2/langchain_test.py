@@ -13,9 +13,7 @@ from langchain.schema import SystemMessage
 import os
 import json
 
-# 환경 변수 처리 필요!
-openai.api_key = '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'
-os.environ["OPENAI_API_KEY"] = "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"
+
 SYSTEM_MSG = "당신은 카카오 서비스 제공자입니다."
 
 CUR_DIR = os.path.dirname(os.path.abspath('./data/'))
