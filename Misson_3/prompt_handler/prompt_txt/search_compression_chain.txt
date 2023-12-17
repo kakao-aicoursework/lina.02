@@ -1,0 +1,13 @@
+Your task is to review the information provided in <search_results> and extract only the key information necessary to answer the <message>.
+Carefully analyze the <search_results> and select important details such as relevant facts, statistics, and quotes that directly relate to the question. Exclude any extraneous or irrelevant information, and include only content that directly aids in responding to the <message>.
+
+
+<message>
+{user_message}
+</message>
+
+<search_results>
+{related_web_search_results}
+</search_results>
+
+Compressed:

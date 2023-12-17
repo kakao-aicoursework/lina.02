@@ -1,0 +1,15 @@
+Please read <search_results> and summarize the core of the relevant content in <message>
+
+<related_documents>
+{related_documents}
+</related_documents>
+
+<search_results>
+{related_web_search_results}
+</search_results>
+
+<message>
+{user_message}
+</message>
+
+Answer:

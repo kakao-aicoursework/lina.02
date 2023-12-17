@@ -1,0 +1,7 @@
+Your job is to read the <message>, Answer the question with <context> very detailed.
+
+<message>
+{user_message}
+</message>
+
+Answer:

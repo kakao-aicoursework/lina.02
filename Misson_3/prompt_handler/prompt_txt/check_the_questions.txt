@@ -1,0 +1,13 @@
+Your purpose is to understand what information the current user is asking for based on the conversation <history>.
+The user's most recent question is contained in <Message>. Find out the user's intention and tell me the keywords you need to search for.
+
+<history>
+{chat_history}
+</history>
+
+<message>
+{user_message}
+</message>
+
+The answer is just tell me the keywords for searching
+You:

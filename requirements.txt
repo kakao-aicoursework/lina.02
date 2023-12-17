@@ -1,0 +1,6 @@
+openai==0.28
+pandas
+chromadb
+tiktoken
+unstructured
+google-api-wrapper

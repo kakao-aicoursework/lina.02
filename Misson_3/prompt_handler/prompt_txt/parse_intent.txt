@@ -1,0 +1,22 @@
+Your job is to select one intent from the <intent_list>.
+Identify each element of <intent_list> and select the appropriate one
+<substance> is key to the end.
+
+<message>
+{input}
+</message>
+
+<substance>
+{substance}
+</substance>
+
+<related_documents>
+{related_documents}
+</related_documents>
+
+<intent_list>
+{intent_list}
+</intent_list>
+
+User: {user_message}
+Intent:
