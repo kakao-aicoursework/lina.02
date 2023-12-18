@@ -1,3 +1,5 @@
+import json
+
 from langchain.chains import ConversationChain, LLMChain
 from langchain.chat_models import ChatOpenAI
 from langchain.prompts.chat import ChatPromptTemplate
@@ -14,45 +16,45 @@ os.environ["OPENAI_API_KEY"] = API_KEY
 
 class Prompt:
     def __init__(self):
-        llm = ChatOpenAI(temperature=0.1, max_tokens=200, model="gpt-3.5-turbo")
+        llm = ChatOpenAI(temperature=0.1, max_tokens=200, model="gpt-3.5-turbo-16k")
         self.parse_intent_chain = self.create_chain(
             llm=llm,
-            template_path="prompt_txt/parse_intent.txt",
+            template_path="/Users/lina/PycharmProjects/lina.02/Misson_3/prompt_handler/prompt_txt/parse_intent.txt",
             output_key="intent",
         )
 
         self.check_the_questions = self.create_chain(
             llm=llm,
-            template_path="prompt_txt/check_the_questions.txt",
+            template_path="/Users/lina/PycharmProjects/lina.02/Misson_3/prompt_handler/prompt_txt/check_the_questions.txt",
             output_key="the_question",
         )
 
         # response
         self.default_chain = self.create_chain(
             llm=llm,
-            template_path="prompt_txt/response_default.txt",
+            template_path="/Users/lina/PycharmProjects/lina.02/Misson_3/prompt_handler/prompt_txt/response_default.txt",
             output_key="answer",
         )
         self.response_with_web = self.create_chain(
             llm=llm,
-            template_path="prompt_txt/response_with_web.txt",
+            template_path="/Users/lina/PycharmProjects/lina.02/Misson_3/prompt_handler/prompt_txt/response_with_web.txt",
             output_key="answer",
         )
         self.response_final = self.create_chain(
             llm=llm,
-            template_path="prompt_txt/response_final.txt",
+            template_path="/Users/lina/PycharmProjects/lina.02/Misson_3/prompt_handler/prompt_txt/response_final.txt",
             output_key="answer",
         )
 
         # search prompt
         self.search_value_check_chain = self.create_chain(
             llm=llm,
-            template_path="prompt_txt/search_value_check.txt",
+            template_path="/Users/lina/PycharmProjects/lina.02/Misson_3/prompt_handler/prompt_txt/search_value_check.txt",
             output_key="related_web_search_results",
         )
         self.search_compression_chain = self.create_chain(
             llm=llm,
-            template_path="prompt_txt/search_compression_chain.txt",
+            template_path="/Users/lina/PycharmProjects/lina.02/Misson_3/prompt_handler/prompt_txt/search_compression_chain.txt",
             output_key="output",
         )
 
@@ -104,6 +106,7 @@ def gernerate(user_message, is_new, conversation_id: str) -> dict[str, str]:
     pt = Prompt()
     ht = History()
 
+    # 히스토리 가져오기
     history_file = ht.load_conversation_history(conversation_id)
 
     context = dict(user_message=user_message)
@@ -117,30 +120,39 @@ def gernerate(user_message, is_new, conversation_id: str) -> dict[str, str]:
     else:
         context['chat_history'] = ""
     context['substance'] = ''
+
+    # 사용자가 원하는게 뭔지 체크
     intent = pt.parse_intent_chain.run(context)
     # 간단한 인사면 넘기기
     if intent == "social_interaction":
-        answer = pt.response_final.run({'user_message': user_message, 'system_answer': '', 'chat_history': context['chat_history']})
+        answer = pt.response_final.run(
+            {'user_message': user_message, 'system_answer': '', 'history': context['chat_history']})
+
+    # 간단한 인사가 아니면, 정보 가져와서 리턴
     else:
-        # 히스토리와 함께 user가 어떤 정보를 원하는지 요약 하기
-        substance = pt.check_the_questions.run({'user_message': user_message, 'chat_history': context['chat_history']})
-        print(substance)
+        #  '히스토리'와 함께 사용자 마지막 질문을 가지고 원하는 것이 뭔지 다시 파악해서 'keyword'로 알려달라고 하기
+        json_fmt = pt.check_the_questions.run({'user_message': user_message, 'chat_history': context['chat_history']})
+        result = json.loads(json_fmt)
+        substance = result['keyword']
         context['substance'] = substance
+        # keyword 로 vector db 검색
         context["related_documents"] = vc.query_db(substance)
+
+        # 정보가 더 필요한 지 확인
         intent = pt.parse_intent_chain.run(context)
         print(intent)
         if intent == "insufficient_information":
+            # 'keyword'로 구글 검색
             context["related_web_search_results"] = pt.search_info(substance)
             system_answer = pt.response_with_web.run(context)
         else:
             system_answer = pt.default_chain.run(context)
-        if is_new:
-            answer = pt.response_final.run({'user_message': user_message,
-                                            'system_answer': system_answer
-                                            })
-        else:
-            answer = pt.response_final.run({'user_message': user_message,
-                                            'system_answer': system_answer})
+
+        # 결과를 다시 친절하게 답변 해달라고 하기
+        answer = pt.response_final.run({'user_message': user_message,
+                                        'system_answer': system_answer,
+                                        'history': context['chat_history']
+                                        })
     ht.log_user_message(history_file, user_message)
     ht.log_bot_message(history_file, answer)
 
@@ -150,6 +162,7 @@ def gernerate(user_message, is_new, conversation_id: str) -> dict[str, str]:
 if __name__ == "__main__":
     import random
     import string
+
     _LENGTH = 10  # 12자리
 
     # 숫자 + 대소문자
@@ -161,5 +174,5 @@ if __name__ == "__main__":
         chat_id += random.choice(string_pool)  # 랜덤한 문자열 하나 선택
     print(chat_id)
 
-    # print(gernerate("카카오 CEO가 누구야?", True, chat_id))
-    print(gernerate("그는 결혼했어?", False, "dg87vdPP0V"))
+    # print(gernerate("카카오 창립자가 누구야?", True, chat_id))
+    print(gernerate("그 중 김범수 나이는? ", False, "A8MkQYczlq"))

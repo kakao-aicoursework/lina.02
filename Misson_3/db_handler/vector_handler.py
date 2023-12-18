@@ -43,9 +43,8 @@ class Vector:
         }
         loader = loader_dict.get(file_p.split(".")[-1])
         documents = loader(file_p).load()
-        text_splitter = CharacterTextSplitter(chunk_size=100, chunk_overlap=30)
+        text_splitter = CharacterTextSplitter(chunk_size=50, chunk_overlap=10)
         docs = text_splitter.split_documents(documents)
-        print(docs)
         Chroma.from_documents(
             docs,
             OpenAIEmbeddings(),
@@ -72,4 +71,4 @@ if __name__ == "__main__":
     file_path = '/Users/lina/PycharmProjects/lina.02/Misson_3/data/'
     vc = Vector()
     # vc.upload_embeddings_from_dir(file_path)
-    print(vc.query_db("카카오 싱크 사용법이모야? 방법이 뭐야?"))
+    print(vc.query_db("카카오 싱크 사용법이 뭐야?"))

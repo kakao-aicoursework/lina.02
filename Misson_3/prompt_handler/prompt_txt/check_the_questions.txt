@@ -9,5 +9,8 @@ The user's most recent question is contained in <Message>. Find out the user's i
 {user_message}
 </message>
 
-The answer is just tell me the keywords for searching
+The answer is just tell me the keywords for searching.
+Please answer in JSON format. JSON format should have the following key values
+ - keyword : Keywords for 'searching' for information
+
 You:

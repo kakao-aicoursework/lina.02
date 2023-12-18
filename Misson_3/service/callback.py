@@ -26,10 +26,6 @@ RAW_DATA = "./data/project_data_카카오싱크.txt"
 
 def callback_handler(request: ChatbotRequest) -> dict:
 
-    writer_llm = ChatOpenAI(temperature=0.1, max_tokens=300, model="gpt-3.5-turbo-16k")
-    summarizer = build_summarizer(writer_llm)
-    anwser = summarizer.run(text=raw_data, ask=request.userRequest.utterance)
-    print(anwser)
 
     # 참고 링크 통해 payload 구조 확인 가능
     payload = {
